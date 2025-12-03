@@ -1,0 +1,45 @@
+{
+  "name": "uptime-monitor",
+  "version": "1.0.0",
+  "description": "Playground for uptime monitoring",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "build": "tsc",
+    "start": "node dist/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/brucruz/uptime-monitor.git"
+  },
+  "keywords": [
+    "uptime-monitor",
+    "hapi",
+    "clickhouse",
+    "otel"
+  ],
+  "author": "brucruz",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/brucruz/uptime-monitor/issues"
+  },
+  "homepage": "https://github.com/brucruz/uptime-monitor#readme",
+  "dependencies": {
+    "@clickhouse/client": "^1.14.0",
+    "@hapi/hapi": "^21.4.4",
+    "@opentelemetry/auto-instrumentations-node": "^0.67.2",
+    "@opentelemetry/exporter-trace-otlp-http": "^0.208.0",
+    "@opentelemetry/resources": "^2.2.0",
+    "@opentelemetry/sdk-node": "^0.208.0",
+    "dotenv": "^17.2.3",
+    "node-cron": "^4.2.1",
+    "playwright": "^1.57.0",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@types/hapi__hapi": "^20.0.13",
+    "@types/node": "^24.10.1",
+    "tsx": "^4.21.0",
+    "typescript": "^5.9.3"
+  }
+}
