@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "tsx watch src/index.ts",
-    "build": "tsc",
+    "build": "tsup",
     "start": "node dist/index.js"
   },
   "repository": {
@@ -39,6 +39,7 @@
   "devDependencies": {
     "@types/hapi__hapi": "^20.0.13",
     "@types/node": "^24.10.1",
+    "tsup": "^8.5.1",
     "tsx": "^4.21.0",
     "typescript": "^5.9.3"
   }
