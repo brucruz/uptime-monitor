@@ -14,6 +14,7 @@ const configSchema = z.object({
   otel: z.object({
     endpoint: z.string(),
     token: z.string(),
+    instanceId: z.string(),
   }),
   target: z.object({
     url: z.string(),
@@ -44,6 +45,7 @@ export const config: Config = configSchema.parse({
   otel: {
     endpoint: process.env.OTEL_EXPORTER_OTLP_ENDPOINT,
     token: process.env.GRAFANA_CLOUD_TOKEN,
+    instanceId: process.env.GRAFANA_CLOUD_INSTANCE_ID,
   },
   target: {
     url: process.env.TARGET_URL,

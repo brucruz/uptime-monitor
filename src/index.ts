@@ -1,8 +1,11 @@
 import { initTables } from "./lib/clickhouse.js";
 import { startScheduler } from "./lib/scheduler.js";
+import { initTracing } from "./lib/tracing.js";
 import { createServer } from "./server.js";
 
 async function start() {
+  console.log("🔭 Initializing tracing...");
+  initTracing();
   console.log("🔧 Initializing database...");
   await initTables();
 

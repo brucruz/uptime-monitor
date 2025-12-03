@@ -117,7 +117,9 @@ export async function getQuickStats(): Promise<QuickStats[]> {
         round(avg(latency_ms), 0) as avg_latency_ms,
         round(quantile(0.95)(latency_ms), 0) as p95_latency_ms
       FROM http_checks
-      WHERE checked_at > now() - INTERVAL 1 HOUR
+      WHERE
+        checked_at > now() - INTERVAL 1 HOUR AND
+        success = 1
     `,
     format: "JSONEachRow",
   });
