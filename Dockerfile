@@ -1,4 +1,4 @@
-FROM node:22-alpine AS builder
+FROM mcr.microsoft.com/playwright:v1.57.0-jammy AS builder
 
 WORKDIR /app
 
@@ -11,35 +11,19 @@ RUN npm ci
 COPY src ./src
 RUN npm run build
 
-FROM node:22-alpine
+FROM mcr.microsoft.com/playwright:v1.57.0-jammy
 
 WORKDIR /app
 
-# Install Playwright dependencies for Chromium only
-RUN apk add --no-cache \
-    chromium \
-    nss \
-    freetype \
-    harfbuzz \
-    ca-certificates \
-    ttf-freefont
-
-# Tell Playwright to use the system Chromium
-ENV PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1
-ENV PLAYWRIGHT_CHROMIUM_EXECUTABLE_PATH=/usr/bin/chromium-browser
-
 COPY package*.json ./
 
-RUN npm ci --omit=dev
+RUN npm ci --only=production
 
 COPY --from=builder /app/dist ./dist
 
 EXPOSE 3000
 
-HEALTHCHECK --interval=30s --timeout=10s --start-period=15s --retries=3 \
-  CMD wget --no-verbose --tries=1 --spider http://localhost:3000/health || exit 1
-
-USER node
-
+HEALTHCHECK --interval=30s --timeout=10s --start-period=40s --retries=3 \
+  CMD node -e "require('http').get('http://localhost:3000/health', (r) => {process.exit(r.statusCode === 200 ? 0 : 1)})"
 
 CMD ["node", "dist/index.js"]

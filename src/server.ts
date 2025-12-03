@@ -7,7 +7,7 @@ import { registerStatsRoutes } from "./routes/stats";
 export async function createServer() {
   const server = Hapi.server({
     port: config.server.port,
-    host: "localhost",
+    host: "0.0.0.0",
   });
 
   registerHealthRoutes(server);
