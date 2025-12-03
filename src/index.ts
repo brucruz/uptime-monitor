@@ -1,3 +1,4 @@
+import { closeBrowser } from "./checks/browser-check.js";
 import { initTables } from "./lib/clickhouse.js";
 import { startScheduler } from "./lib/scheduler.js";
 import { initTracing } from "./lib/tracing.js";
@@ -14,6 +15,14 @@ async function start() {
   console.log(`🚀 Server running at: ${server.info.uri}`);
   console.log("⏰ Starting scheduler...");
   startScheduler();
+
+  // Graceful shutdown
+  process.on("SIGINT", async () => {
+    console.log("\n🛑 Shutting down gracefully...");
+    await closeBrowser();
+    await server.stop();
+    process.exit(0);
+  });
 }
 
 start().catch(console.error);

@@ -1,6 +1,7 @@
 import { createClient } from "@clickhouse/client";
 import { config } from "../config";
 import { HttpCheckResult } from "../checks/http-check";
+import { BrowserCheckResult } from "../checks/browser-check";
 
 export const clickhouse = createClient({
   url: `https://${config.clickhouse.host}:${config.clickhouse.port}`,
@@ -69,6 +70,20 @@ export async function insertHttpCheck(result: HttpCheckResult) {
   });
 }
 
+export async function insertBrowserCheck(result: BrowserCheckResult) {
+  await clickhouse.insert({
+    table: "browser_checks",
+    values: [
+      {
+        ...result,
+        success: result.success ? 1 : 0,
+        checked_at: result.checked_at.toISOString(),
+      },
+    ],
+    format: "JSONEachRow",
+  });
+}
+
 export interface HttpCheck {
   url: string;
   status_code: number;
@@ -98,6 +113,35 @@ export async function getHttpChecks(): Promise<HttpCheck[]> {
   return result.json();
 }
 
+export interface BrowserCheck {
+  url: string;
+  check_type: string;
+  success: boolean;
+  latency_ms: number;
+  error_message: string | null;
+  checked_at: string;
+  trace_id: string;
+}
+export async function getBrowserChecks(): Promise<BrowserCheck[]> {
+  const result = await clickhouse.query({
+    query: `
+      SELECT 
+        url,
+        check_type,
+        success,
+        latency_ms,
+        error_message,
+        checked_at,
+        trace_id
+      FROM browser_checks
+      ORDER BY checked_at DESC
+      LIMIT 20
+    `,
+    format: "JSONEachRow",
+  });
+  return result.json();
+}
+
 export interface QuickStats {
   total_checks: number;
   successful: number;
@@ -106,7 +150,25 @@ export interface QuickStats {
   avg_latency_ms: number;
   p95_latency_ms: number;
 }
-export async function getQuickStats(): Promise<QuickStats[]> {
+export async function getBrowserStats(): Promise<QuickStats[]> {
+  const result = await clickhouse.query({
+    query: `
+      SELECT 
+        count() as total_checks,
+        countIf(success = 1) as successful,
+        countIf(success = 0) as failed,
+        round(countIf(success = 1) / count() * 100, 2) as uptime_percent,
+        round(avgIf(latency_ms, success = 1), 0) as avg_latency_ms,
+        round(quantileIf(0.95)(latency_ms, success = 1), 0) as p95_latency_ms
+      FROM browser_checks
+      WHERE checked_at > now() - INTERVAL 1 HOUR
+    `,
+    format: "JSONEachRow",
+  });
+  return result.json();
+}
+
+export async function getHttpStats(): Promise<QuickStats[]> {
   const result = await clickhouse.query({
     query: `
       SELECT 

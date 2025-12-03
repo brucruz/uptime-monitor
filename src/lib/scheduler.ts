@@ -1,11 +1,12 @@
 import cron from "node-cron";
 import { config } from "../config";
-import { insertHttpCheck } from "./clickhouse";
+import { insertBrowserCheck, insertHttpCheck } from "./clickhouse";
 import { runHttpCheck } from "../checks/http-check";
 import { SpanStatusCode, trace } from "@opentelemetry/api";
+import { runBrowserCheck } from "../checks/browser-check";
 
 export function startScheduler() {
-  // every <config.check.httpInterval> minutes
+  // HTTP checks: every <config.check.httpInterval> minutes
   const httpCronPattern = `*/${config.check.httpInterval} * * * *`;
   console.log(
     `📅 Scheduling HTTP checks: every ${config.check.httpInterval} minute(s)`
@@ -24,6 +25,39 @@ export function startScheduler() {
         span.setStatus({ code: SpanStatusCode.OK });
       } catch (error) {
         console.error("❌ [CRON] Error running HTTP check:", error);
+        span.setStatus({
+          code: SpanStatusCode.ERROR,
+          message: error instanceof Error ? error.message : "Unknown error",
+        });
+        span.recordException(error as Error);
+      } finally {
+        span.end();
+      }
+    });
+  });
+
+  // Browser checks: every <config.check.browserInterval> minutes
+  const browserCronPattern = `*/${config.check.browserInterval} * * * *`;
+
+  console.log(
+    `📅 Scheduling browser checks: every ${config.check.browserInterval} minute(s)`
+  );
+
+  cron.schedule(browserCronPattern, async () => {
+    console.log("🎭 [CRON] Running scheduled browser check...");
+    await tracer.startActiveSpan("scheduled-browser-check", async (span) => {
+      try {
+        const result = await runBrowserCheck();
+        await insertBrowserCheck(result);
+        const status = result.success ? "✅" : "❌";
+        span.setStatus({ code: SpanStatusCode.OK });
+        console.log(
+          `${status} [CRON] Browser check completed: ${
+            result.success ? "passed" : "failed"
+          } (${result.latency_ms}ms)`
+        );
+      } catch (error) {
+        console.error("❌ [CRON] Error running browser check:", error);
         span.setStatus({
           code: SpanStatusCode.ERROR,
           message: error instanceof Error ? error.message : "Unknown error",
