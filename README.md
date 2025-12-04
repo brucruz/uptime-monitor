@@ -7,6 +7,7 @@ A hybrid uptime monitoring system combining HTTP health checks with browser-base
 ## Why I Built This
 
 Built as a hands-on exploration of:
+
 - **ClickHouse** for time-series check data (vs. traditional RDBMS)
 - **OpenTelemetry** for distributed tracing
 - **Hapi.js** as the API framework
@@ -98,6 +99,12 @@ curl https://uptime-monitor-production-e13b.up.railway.app/checks/browser | jq
 | `GET`  | `/stats`              | Aggregated metrics (1 hour window) |
 | `POST` | `/checks/http/run`    | Manually trigger HTTP check        |
 | `POST` | `/checks/browser/run` | Manually trigger browser check     |
+
+## Tracing
+
+![Grafana Trace View](./docs/grafana-screenshot.png)
+
+Each check includes a `trace_id` linking to the full distributed trace in Grafana Cloud.
 
 ## Key Implementation Details
 
