@@ -2,7 +2,17 @@
 
 A hybrid uptime monitoring system combining HTTP health checks with browser-based login verification. Built to explore ClickHouse for time-series data and OpenTelemetry for distributed tracing.
 
-Currently monitoring [GlobalDial](https://globaldial.co) as a real-world test case.
+![Status](https://img.shields.io/badge/status-live-brightgreen)
+
+## Why I Built This
+
+Built as a hands-on exploration of:
+- **ClickHouse** for time-series check data (vs. traditional RDBMS)
+- **OpenTelemetry** for distributed tracing
+- **Hapi.js** as the API framework
+- **Playwright** for real browser-based monitoring
+
+This monitors my production service [GlobalDial](https://globaldial.co) as a real-world test case.
 
 ## Features
 
